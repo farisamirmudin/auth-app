@@ -93,7 +93,6 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
 			if (!restoreSessionResult.ok) {
 				setUser(null);
-				setAuthError(restoreSessionResult.error);
 				setIsInitializing(false);
 				return;
 			}

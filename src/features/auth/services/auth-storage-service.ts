@@ -5,7 +5,7 @@ import type {
 	SignupFormValues,
 } from "@/features/auth/validation/auth";
 import { hashPassword, verifyPassword } from "@/lib/crypto";
-import { result } from "@/shared/utils/result";
+import { tryCatch, tryCatchSync } from "@/shared/utils/result";
 
 const SESSION_EMAIL_KEY = "auth:session-email";
 const USER_KEY_PREFIX = "auth:user:";
@@ -18,14 +18,6 @@ function getUserKey(email: string): string {
 	return `${USER_KEY_PREFIX}${normalizeEmail(email)}`;
 }
 
-async function toStoredUser(payload: SignupFormValues): Promise<StoredUser> {
-	return {
-		name: payload.name.trim(),
-		email: normalizeEmail(payload.email),
-		password: await hashPassword(payload.password),
-	};
-}
-
 function toUser(storedUser: StoredUser): User {
 	return {
 		name: storedUser.name,
@@ -33,116 +25,137 @@ function toUser(storedUser: StoredUser): User {
 	};
 }
 
-function parseStoredUser(serializedUser: string): StoredUser | null {
-	try {
-		const parsed = JSON.parse(serializedUser) as Partial<StoredUser>;
+function parseStoredUser(serializedUser: string): AuthResult<StoredUser> {
+	return tryCatchSync(
+		() => {
+			const parsed = JSON.parse(serializedUser) as Partial<StoredUser>;
 
-		return {
-			name: parsed.name ?? "",
-			email: parsed.email ?? "",
-			password: parsed.password ?? "",
-		};
-	} catch {
-		return null;
-	}
+			return {
+				name: parsed.name ?? "",
+				email: parsed.email ?? "",
+				password: parsed.password ?? "",
+			};
+		},
+		() => "Incorrect email or password.",
+	);
 }
 
 export const authStorageService = {
 	async signup(payload: SignupFormValues): Promise<AuthResult<User>> {
-		try {
-			const normalizedEmail = normalizeEmail(payload.email);
-			const userKey = getUserKey(normalizedEmail);
-			const existingUser = await AsyncStorage.getItem(userKey);
+		return tryCatch(
+			async () => {
+				const normalizedEmail = normalizeEmail(payload.email);
+				const userKey = getUserKey(normalizedEmail);
+				const existingUser = await AsyncStorage.getItem(userKey);
 
-			if (existingUser) {
-				return result.err("Email is already registered.");
-			}
+				if (existingUser) {
+					throw new Error("Email is already registered.");
+				}
 
-			const nextStoredUser = await toStoredUser(payload);
+				const hashResult = await hashPassword(payload.password);
 
-			await AsyncStorage.setItem(userKey, JSON.stringify(nextStoredUser));
-			await AsyncStorage.setItem(SESSION_EMAIL_KEY, normalizedEmail);
+				if (!hashResult.ok) {
+					throw new Error(hashResult.error);
+				}
 
-			return result.ok(toUser(nextStoredUser));
-		} catch (error: unknown) {
-			console.error("Error signing up", error);
-			return result.err("Something went wrong. Please try again.");
-		}
+				const nextStoredUser: StoredUser = {
+					name: payload.name.trim(),
+					email: normalizedEmail,
+					password: hashResult.value,
+				};
+
+				await AsyncStorage.setItem(userKey, JSON.stringify(nextStoredUser));
+				await AsyncStorage.setItem(SESSION_EMAIL_KEY, normalizedEmail);
+
+				return toUser(nextStoredUser);
+			},
+			(error) =>
+				error instanceof Error
+					? error.message
+					: "Something went wrong. Please try again.",
+		);
 	},
 
 	async login(payload: LoginFormValues): Promise<AuthResult<User>> {
-		try {
-			const normalizedEmail = normalizeEmail(payload.email);
-			const userKey = getUserKey(normalizedEmail);
-			const serializedUser = await AsyncStorage.getItem(userKey);
+		return tryCatch(
+			async () => {
+				const normalizedEmail = normalizeEmail(payload.email);
+				const userKey = getUserKey(normalizedEmail);
+				const serializedUser = await AsyncStorage.getItem(userKey);
 
-			if (!serializedUser) {
-				return result.err("Incorrect email or password.");
-			}
+				if (!serializedUser) {
+					throw new Error("Incorrect email or password.");
+				}
 
-			const storedUser = parseStoredUser(serializedUser);
+				const parseResult = parseStoredUser(serializedUser);
 
-			if (!storedUser) {
-				return result.err("Incorrect email or password.");
-			}
+				if (!parseResult.ok) {
+					throw new Error(parseResult.error);
+				}
 
-			const isPasswordValid = await verifyPassword(
-				payload.password,
-				storedUser.password,
-			);
+				const verifyResult = await verifyPassword(
+					payload.password,
+					parseResult.value.password,
+				);
 
-			if (!isPasswordValid) {
-				return result.err("Incorrect email or password.");
-			}
+				if (!verifyResult.ok) {
+					throw new Error(verifyResult.error);
+				}
 
-			await AsyncStorage.setItem(SESSION_EMAIL_KEY, normalizedEmail);
+				if (!verifyResult.value) {
+					throw new Error("Incorrect email or password.");
+				}
 
-			return result.ok(toUser(storedUser));
-		} catch (error: unknown) {
-			console.error("Error logging in", error);
-			return result.err("Something went wrong. Please try again.");
-		}
+				await AsyncStorage.setItem(SESSION_EMAIL_KEY, normalizedEmail);
+
+				return toUser(parseResult.value);
+			},
+			(error) =>
+				error instanceof Error
+					? error.message
+					: "Something went wrong. Please try again.",
+		);
 	},
 
 	async logout(): Promise<AuthResult<null>> {
-		try {
-			await AsyncStorage.removeItem(SESSION_EMAIL_KEY);
-			return result.ok(null);
-		} catch (error: unknown) {
-			console.error("Error logging out", error);
-			return result.err("Something went wrong. Please try again.");
-		}
+		return tryCatch(
+			async () => {
+				await AsyncStorage.removeItem(SESSION_EMAIL_KEY);
+				return null;
+			},
+			() => "Something went wrong. Please try again.",
+		);
 	},
 
 	async restoreSession(): Promise<AuthResult<User | null>> {
-		try {
-			const sessionEmail = await AsyncStorage.getItem(SESSION_EMAIL_KEY);
+		return tryCatch(
+			async () => {
+				const sessionEmail = await AsyncStorage.getItem(SESSION_EMAIL_KEY);
 
-			if (!sessionEmail) {
-				return result.ok(null);
-			}
+				if (!sessionEmail) {
+					return null;
+				}
 
-			const normalizedEmail = normalizeEmail(sessionEmail);
-			const userKey = getUserKey(normalizedEmail);
-			const serializedUser = await AsyncStorage.getItem(userKey);
+				const normalizedEmail = normalizeEmail(sessionEmail);
+				const userKey = getUserKey(normalizedEmail);
+				const serializedUser = await AsyncStorage.getItem(userKey);
 
-			if (!serializedUser) {
-				await AsyncStorage.removeItem(SESSION_EMAIL_KEY);
-				return result.ok(null);
-			}
+				if (!serializedUser) {
+					await AsyncStorage.removeItem(SESSION_EMAIL_KEY);
+					return null;
+				}
 
-			const storedUser = parseStoredUser(serializedUser);
+				const parseResult = parseStoredUser(serializedUser);
 
-			if (!storedUser) {
-				await AsyncStorage.removeItem(SESSION_EMAIL_KEY);
-				await AsyncStorage.removeItem(userKey);
-				return result.ok(null);
-			}
+				if (!parseResult.ok) {
+					await AsyncStorage.removeItem(SESSION_EMAIL_KEY);
+					await AsyncStorage.removeItem(userKey);
+					return null;
+				}
 
-			return result.ok(toUser(storedUser));
-		} catch (error: unknown) {
-			console.error("Error restoring session", error);
-			return result.err("Failed to restore session. Please login again.");
-		}
+				return toUser(parseResult.value);
+			},
+			() => "Failed to restore session. Please login again.",
+		);
 	},
 };

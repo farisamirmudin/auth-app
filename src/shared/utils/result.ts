@@ -25,3 +25,25 @@ export const result = {
 		};
 	},
 };
+
+export async function tryCatch<T, E>(
+	fn: () => Promise<T>,
+	mapError: (error: unknown) => E,
+): Promise<Result<T, E>> {
+	try {
+		return { ok: true, value: await fn() };
+	} catch (error) {
+		return { ok: false, error: mapError(error) };
+	}
+}
+
+export function tryCatchSync<T, E>(
+	fn: () => T,
+	mapError: (error: unknown) => E,
+): Result<T, E> {
+	try {
+		return { ok: true, value: fn() };
+	} catch (error) {
+		return { ok: false, error: mapError(error) };
+	}
+}
