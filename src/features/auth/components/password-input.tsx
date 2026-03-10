@@ -1,11 +1,8 @@
 import { useCallback, useMemo, useState } from "react";
 import { useController } from "react-hook-form";
-import type { TextInputProps } from "react-native";
 import { Pressable, StyleSheet, Text } from "react-native";
 import { AppTextInput } from "@/shared/components/app-text-input";
 import { colors } from "@/shared/theme/colors";
-
-const BULLET = "\u2022";
 
 function PasswordToggle({
 	onPress,
@@ -38,50 +35,13 @@ export function PasswordInput({
 	const {
 		field: passwordField,
 		fieldState: { error },
-	} = useController({
+	} = useController<{ password: string }>({
 		name: "password",
 	});
-
-	const password = passwordField.value ?? "";
 
 	const handleToggle = useCallback(() => {
 		setIsPasswordVisible((prev) => !prev);
 	}, []);
-
-	const handleChangeText = useCallback(
-		(text: string) => {
-			const realPart = text.replace(/\u2022/g, "");
-			if (realPart.length > 0) {
-				const bulletCount = text.length - realPart.length;
-				passwordField.onChange(password.slice(0, bulletCount) + realPart);
-				return;
-			}
-			if (text.length < password.length) {
-				passwordField.onChange(password.slice(0, text.length));
-			}
-		},
-		[password, passwordField],
-	);
-
-	const handleKeyPress = useCallback(
-		(e: Parameters<NonNullable<TextInputProps["onKeyPress"]>>[0]) => {
-			const key = e.nativeEvent.key;
-			if (key === "Backspace") {
-				passwordField.onChange(password.slice(0, -1));
-			} else if (key.length === 1) {
-				passwordField.onChange(password + key);
-			}
-		},
-		[password, passwordField],
-	);
-
-	const displayValue = isPasswordVisible
-		? password
-		: BULLET.repeat(password.length);
-	const handleTextChange = isPasswordVisible
-		? passwordField.onChange
-		: handleChangeText;
-	const handleKeyPressProp = isPasswordVisible ? undefined : handleKeyPress;
 
 	const rightAdornment = useMemo(
 		() => (
@@ -95,13 +55,12 @@ export function PasswordInput({
 
 	return (
 		<AppTextInput
+			secureTextEntry={!isPasswordVisible}
 			testID="password-input"
 			label="Password"
 			textContentType={textContentType}
-			// secureTextEntry={!isPasswordVisible} UI fps drops from 60 to 30 https://github.com/facebook/react-native/issues/28911
-			value={displayValue}
-			onChangeText={handleTextChange}
-			onKeyPress={handleKeyPressProp}
+			value={passwordField.value}
+			onChangeText={passwordField.onChange}
 			onBlur={passwordField.onBlur}
 			rightAdornment={rightAdornment}
 			errorMessage={error?.message}
