@@ -12,9 +12,9 @@ import {
 	signupSchema,
 } from "@/features/auth/validation/auth";
 import type { AuthStackParamList } from "@/navigation/types";
+import { AppButton } from "@/shared/components/app-button";
 import { AppTextInput } from "@/shared/components/app-text-input";
 import { colors } from "@/shared/theme/colors";
-import { Button } from "../components/button";
 
 type SignupScreenProps = NativeStackScreenProps<AuthStackParamList, "signup">;
 
@@ -61,6 +61,7 @@ export function SignupScreen({ navigation }: SignupScreenProps) {
 		<Layout title="Signup" description="Create your account to get started.">
 			<FormProvider {...methods}>
 				<AppTextInput
+					testID="name-input"
 					label="Name"
 					textContentType="name"
 					value={nameField.value ?? ""}
@@ -69,19 +70,21 @@ export function SignupScreen({ navigation }: SignupScreenProps) {
 					errorMessage={error?.message}
 				/>
 				<EmailInput />
-				<PasswordInput />
+				<PasswordInput textContentType="newPassword" />
 
 				{authError ? (
 					<Text style={styles.authErrorText}>{authError}</Text>
 				) : null}
 
-				<Button
+				<AppButton
+					testID="signup-button"
 					onPress={handleSubmit(onSubmit)}
 					isLoading={isLoading}
 					label={signupButtonLabel}
 					variant="primary"
 				/>
-				<Button
+				<AppButton
+					testID="goto-login-button"
 					onPress={handleNavigateToLogin}
 					isLoading={isLoading}
 					label="Go to Login"

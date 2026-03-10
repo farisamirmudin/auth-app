@@ -1,0 +1,191 @@
+appId: com.authapp
+---
+- clearState
+- launchApp
+
+# =============================================
+# LOGIN SCREEN — show/hide password toggle
+# =============================================
+- assertVisible: "Login"
+- tapOn:
+    id: "password-input"
+- inputText: "secret"
+- tapOn: "Welcome back.*"
+- assertVisible: "Show password"
+- tapOn:
+    id: "password-toggle"
+- assertVisible: "Hide password"
+- takeScreenshot: screenshots/login-password-visible
+- tapOn:
+    id: "password-toggle"
+- assertVisible: "Show password"
+- takeScreenshot: screenshots/login-password-hidden
+- tapOn:
+    id: "password-input"
+- eraseText: 50
+- tapOn: "Welcome back.*"
+
+# =============================================
+# LOGIN SCREEN — empty form validation errors
+# =============================================
+- tapOn:
+    id: "login-button"
+- assertVisible: "Please enter a valid email address."
+- assertVisible: "Password is required."
+- takeScreenshot: screenshots/login-empty-validation
+
+# =============================================
+# LOGIN SCREEN — invalid email format
+# =============================================
+- tapOn:
+    id: "email-input"
+- inputText: "notanemail"
+- tapOn:
+    id: "password-input"
+- inputText: "123"
+- tapOn: "Welcome back.*"
+- tapOn:
+    id: "login-button"
+- assertVisible: "Please enter a valid email address."
+- takeScreenshot: screenshots/login-invalid-email
+
+# =============================================
+# LOGIN SCREEN — incorrect credentials
+# =============================================
+- tapOn:
+    id: "email-input"
+- eraseText: 50
+- inputText: "test@example.com"
+- tapOn:
+    id: "password-input"
+- eraseText: 50
+- inputText: "password123"
+- tapOn: "Welcome back.*"
+- tapOn:
+    id: "login-button"
+- assertVisible: "Incorrect email or password."
+- takeScreenshot: screenshots/login-incorrect-credentials
+
+# =============================================
+# NAVIGATE TO SIGNUP
+# =============================================
+- tapOn:
+    id: "goto-signup-button"
+- assertVisible: "Signup"
+
+# =============================================
+# SIGNUP SCREEN — empty form validation errors
+# =============================================
+- tapOn:
+    id: "signup-button"
+- assertVisible: "Name is required."
+- assertVisible: "Please enter a valid email address."
+- assertVisible: "Password must be at least 6 characters."
+- takeScreenshot: screenshots/signup-empty-validation
+
+# =============================================
+# SIGNUP SCREEN — invalid email + short password
+# =============================================
+- tapOn:
+    id: "name-input"
+- inputText: "John"
+- tapOn:
+    id: "email-input"
+- inputText: "bademail"
+- tapOn:
+    id: "password-input"
+- inputText: "12345"
+- tapOn: "Create your account.*"
+- tapOn:
+    id: "signup-button"
+- assertVisible: "Please enter a valid email address."
+- assertVisible: "Password must be at least 6 characters."
+- takeScreenshot: screenshots/signup-invalid-fields
+
+# =============================================
+# SIGNUP SCREEN — successful signup
+# =============================================
+- tapOn:
+    id: "name-input"
+- eraseText: 50
+- inputText: "John Doe"
+- tapOn:
+    id: "email-input"
+- eraseText: 50
+- inputText: "john@example.com"
+- tapOn:
+    id: "password-input"
+- eraseText: 50
+- inputText: "password123"
+- tapOn: "Create your account.*"
+- tapOn:
+    id: "signup-button"
+
+# =============================================
+# HOME SCREEN — user info displayed
+# =============================================
+- assertVisible: "Name: John Doe"
+- assertVisible: "Email: john@example.com"
+- assertVisible: "Logout"
+- takeScreenshot: screenshots/home-screen
+
+# =============================================
+# LOGOUT — back to login
+# =============================================
+- tapOn: "Logout"
+- assertVisible: "Login"
+
+# =============================================
+# SIGNUP SCREEN — email already registered
+# =============================================
+- tapOn:
+    id: "goto-signup-button"
+- assertVisible: "Signup"
+- tapOn:
+    id: "name-input"
+- inputText: "John Doe"
+- tapOn:
+    id: "email-input"
+- inputText: "john@example.com"
+- tapOn:
+    id: "password-input"
+- inputText: "password123"
+- tapOn: "Create your account.*"
+- tapOn:
+    id: "signup-button"
+- assertVisible: "Email is already registered."
+- takeScreenshot: screenshots/signup-email-already-registered
+- tapOn:
+    id: "goto-login-button"
+- assertVisible: "Login"
+
+# =============================================
+# LOGIN SCREEN — successful login
+# =============================================
+- tapOn:
+    id: "email-input"
+- inputText: "john@example.com"
+- tapOn:
+    id: "password-input"
+- inputText: "password123"
+- tapOn: "Welcome back.*"
+- tapOn:
+    id: "login-button"
+
+# =============================================
+# HOME SCREEN — logged in again
+# =============================================
+- assertVisible: "Name: John Doe"
+- assertVisible: "Email: john@example.com"
+- assertVisible: "Logout"
+- takeScreenshot: screenshots/home-after-login
+
+# =============================================
+# SESSION PERSISTENCE — quit and reopen app
+# =============================================
+- stopApp
+- launchApp
+- assertVisible: "Name: John Doe"
+- assertVisible: "Email: john@example.com"
+- assertVisible: "Logout"
+- takeScreenshot: screenshots/session-persisted

@@ -11,7 +11,10 @@ export function EmailInput() {
 
 	return (
 		<AppTextInput
+			testID="email-input"
 			label="Email"
+			textContentType="emailAddress"
+			keyboardType="email-address"
 			value={emailField.value ?? ""}
 			onChangeText={emailField.onChange}
 			onBlur={emailField.onBlur}

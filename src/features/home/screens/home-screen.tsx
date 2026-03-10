@@ -2,8 +2,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useCallback } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Button } from "@/features/auth/components/button";
 import { useAuth } from "@/features/auth/hooks/use-auth";
+import { AppButton } from "@/shared/components/app-button";
 import { colors } from "@/shared/theme/colors";
 
 export function HomeScreen() {
@@ -31,7 +31,11 @@ export function HomeScreen() {
 					</View>
 				</View>
 
-				<Button onPress={handleLogout} isLoading={isLoading} label="Logout" />
+				<AppButton
+					onPress={handleLogout}
+					isLoading={isLoading}
+					label="Logout"
+				/>
 			</View>
 		</SafeAreaView>
 	);

@@ -16,8 +16,10 @@ function PasswordToggle({
 }) {
 	return (
 		<Pressable
+			testID="password-toggle"
 			accessibilityRole="button"
-			accessibilityLabel="Toggle password visibility"
+			accessibilityLabel={`${label} password`}
+			accessibilityHint="Toggle password visibility"
 			style={styles.passwordToggleButton}
 			onPress={onPress}
 		>
@@ -26,7 +28,11 @@ function PasswordToggle({
 	);
 }
 
-export function PasswordInput() {
+export function PasswordInput({
+	textContentType,
+}: {
+	textContentType: "password" | "newPassword";
+}) {
 	const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
 	const {
@@ -89,8 +95,9 @@ export function PasswordInput() {
 
 	return (
 		<AppTextInput
+			testID="password-input"
 			label="Password"
-			textContentType="password"
+			textContentType={textContentType}
 			// secureTextEntry={!isPasswordVisible} UI fps drops from 60 to 30 https://github.com/facebook/react-native/issues/28911
 			value={displayValue}
 			onChangeText={handleTextChange}

@@ -1,19 +1,22 @@
 import { ActivityIndicator, Pressable, StyleSheet, Text } from "react-native";
 import { colors } from "@/shared/theme/colors";
 
-export function Button({
+export function AppButton({
 	onPress,
 	isLoading,
 	label,
 	variant = "primary",
+	testID,
 }: {
 	onPress: () => void;
 	isLoading: boolean;
 	label: string;
 	variant?: "primary" | "link";
+	testID?: string;
 }) {
 	return (
 		<Pressable
+			testID={testID}
 			accessibilityRole="button"
 			style={[
 				variant === "primary" ? styles.primaryButton : styles.link,

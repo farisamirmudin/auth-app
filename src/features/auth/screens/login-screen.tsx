@@ -12,8 +12,8 @@ import {
 	loginSchema,
 } from "@/features/auth/validation/auth";
 import type { AuthStackParamList } from "@/navigation/types";
+import { AppButton } from "@/shared/components/app-button";
 import { colors } from "@/shared/theme/colors";
-import { Button } from "../components/button";
 
 type LoginScreenProps = NativeStackScreenProps<AuthStackParamList, "login">;
 
@@ -54,19 +54,21 @@ export function LoginScreen({ navigation }: LoginScreenProps) {
 		>
 			<FormProvider {...methods}>
 				<EmailInput />
-				<PasswordInput />
+				<PasswordInput textContentType="password" />
 
 				{authError ? (
 					<Text style={styles.authErrorText}>{authError}</Text>
 				) : null}
 
-				<Button
+				<AppButton
+					testID="login-button"
 					onPress={handleSubmit(onSubmit)}
 					isLoading={isLoading}
 					label={loginButtonLabel}
 					variant="primary"
 				/>
-				<Button
+				<AppButton
+					testID="goto-signup-button"
 					onPress={handleNavigateToSignup}
 					isLoading={isLoading}
 					label="Go to Signup"
