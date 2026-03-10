@@ -1,4 +1,4 @@
-import { type ReactNode, useCallback, useMemo, useState } from "react";
+import { type ReactNode, useState } from "react";
 import {
 	StyleSheet,
 	Text,
@@ -24,30 +24,25 @@ export function AppTextInput({
 }: AppTextInputProps) {
 	const [isFocused, setIsFocused] = useState(false);
 
-	const handleFocus = useCallback(
-		(event: Parameters<NonNullable<TextInputProps["onFocus"]>>[0]) => {
-			setIsFocused(true);
-			onFocus?.(event);
-		},
-		[onFocus],
-	);
+	const handleFocus = (
+		event: Parameters<NonNullable<TextInputProps["onFocus"]>>[0],
+	) => {
+		setIsFocused(true);
+		onFocus?.(event);
+	};
 
-	const handleBlur = useCallback(
-		(event: Parameters<NonNullable<TextInputProps["onBlur"]>>[0]) => {
-			setIsFocused(false);
-			onBlur?.(event);
-		},
-		[onBlur],
-	);
+	const handleBlur = (
+		event: Parameters<NonNullable<TextInputProps["onBlur"]>>[0],
+	) => {
+		setIsFocused(false);
+		onBlur?.(event);
+	};
 
-	const inputContainerStyle = useMemo(
-		() => [
-			styles.inputContainer,
-			isFocused ? styles.inputContainerFocused : null,
-			errorMessage ? styles.inputContainerError : null,
-		],
-		[errorMessage, isFocused],
-	);
+	const inputContainerStyle = [
+		styles.inputContainer,
+		isFocused ? styles.inputContainerFocused : null,
+		errorMessage ? styles.inputContainerError : null,
+	];
 
 	return (
 		<View style={styles.fieldContainer}>

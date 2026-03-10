@@ -1,12 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import type { PropsWithChildren } from "react";
-import {
-	createContext,
-	useCallback,
-	useEffect,
-	useMemo,
-	useState,
-} from "react";
+import { createContext, useEffect, useState } from "react";
 import { authStorageService } from "@/features/auth/services/auth-storage-service";
 import type { AuthContextValue, User } from "@/features/auth/types";
 import type {
@@ -35,41 +29,35 @@ export function AuthProvider({ children }: PropsWithChildren) {
 		mutationFn: authStorageService.logout,
 	});
 
-	const clearAuthError = useCallback(() => {
+	const clearAuthError = () => {
 		setAuthError(null);
-	}, []);
+	};
 
-	const login = useCallback(
-		async (payload: LoginFormValues) => {
-			setAuthError(null);
-			const loginResult = await loginMutation.mutateAsync(payload);
+	const login = async (payload: LoginFormValues) => {
+		setAuthError(null);
+		const loginResult = await loginMutation.mutateAsync(payload);
 
-			if (!loginResult.ok) {
-				setAuthError(loginResult.error);
-				return;
-			}
+		if (!loginResult.ok) {
+			setAuthError(loginResult.error);
+			return;
+		}
 
-			setUser(loginResult.value);
-		},
-		[loginMutation],
-	);
+		setUser(loginResult.value);
+	};
 
-	const signup = useCallback(
-		async (payload: SignupFormValues) => {
-			setAuthError(null);
-			const signupResult = await signupMutation.mutateAsync(payload);
+	const signup = async (payload: SignupFormValues) => {
+		setAuthError(null);
+		const signupResult = await signupMutation.mutateAsync(payload);
 
-			if (!signupResult.ok) {
-				setAuthError(signupResult.error);
-				return;
-			}
+		if (!signupResult.ok) {
+			setAuthError(signupResult.error);
+			return;
+		}
 
-			setUser(signupResult.value);
-		},
-		[signupMutation],
-	);
+		setUser(signupResult.value);
+	};
 
-	const logout = useCallback(async () => {
+	const logout = async () => {
 		setAuthError(null);
 		const logoutResult = await logoutMutation.mutateAsync();
 
@@ -79,7 +67,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 		}
 
 		setUser(null);
-	}, [logoutMutation]);
+	};
 
 	useEffect(() => {
 		let isMounted = true;
@@ -113,29 +101,17 @@ export function AuthProvider({ children }: PropsWithChildren) {
 		signupMutation.isPending ||
 		logoutMutation.isPending;
 
-	const value = useMemo<AuthContextValue>(
-		() => ({
-			user,
-			isAuthenticated: user !== null,
-			isInitializing,
-			isLoading,
-			authError,
-			login,
-			signup,
-			logout,
-			clearAuthError,
-		}),
-		[
-			authError,
-			clearAuthError,
-			isInitializing,
-			isLoading,
-			login,
-			logout,
-			signup,
-			user,
-		],
-	);
+	const value: AuthContextValue = {
+		user,
+		isAuthenticated: user !== null,
+		isInitializing,
+		isLoading,
+		authError,
+		login,
+		signup,
+		logout,
+		clearAuthError,
+	};
 
-	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+	return <AuthContext value={value}>{children}</AuthContext>;
 }

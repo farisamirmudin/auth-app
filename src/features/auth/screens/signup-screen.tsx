@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useCallback, useMemo } from "react";
 import { FormProvider, useController, useForm } from "react-hook-form";
 import { StyleSheet, Text } from "react-native";
 import { EmailInput } from "@/features/auth/components/email-input";
@@ -40,22 +39,16 @@ export function SignupScreen({ navigation }: SignupScreenProps) {
 		name: "name",
 	});
 
-	const handleNavigateToLogin = useCallback(() => {
+	const handleNavigateToLogin = () => {
 		clearAuthError();
 		navigation.replace("login");
-	}, [clearAuthError, navigation]);
+	};
 
-	const signupButtonLabel = useMemo(
-		() => (isLoading ? "Signing up..." : "Signup"),
-		[isLoading],
-	);
-	const onSubmit = useCallback(
-		async (values: SignupFormValues) => {
-			clearAuthError();
-			await signup(values);
-		},
-		[clearAuthError, signup],
-	);
+	const signupButtonLabel = isLoading ? "Signing up..." : "Signup";
+	const onSubmit = async (values: SignupFormValues) => {
+		clearAuthError();
+		await signup(values);
+	};
 
 	return (
 		<Layout title="Signup" description="Create your account to get started.">

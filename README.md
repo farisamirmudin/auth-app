@@ -2,6 +2,11 @@
 
 A React Native authentication app built with Expo, featuring Login and Signup flows with persistent session management.
 
+## Branch Note
+
+This branch enables the **React 19 Compiler**. React Compiler auto-memoizes, so I don't explicitly add `useMemo`, `memo`, or `useCallback`.
+Use the `main` branch for the non-compiler version: `git switch main`.
+
 ## Features
 
 ### Authentication Context
@@ -60,6 +65,7 @@ A React Native authentication app built with Expo, featuring Login and Signup fl
 ## Tech Stack
 
 - **Framework:** React Native with Expo (SDK 54)
+- **React Compiler:** Enabled (React 19 Compiler)
 - **Navigation:** React Navigation (Native Stack)
 - **State Management:** React Context API + TanStack React Query
 - **Form Handling:** React Hook Form + Zod validation

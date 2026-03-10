@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useState } from "react";
 import { useController } from "react-hook-form";
 import { Pressable, StyleSheet, Text } from "react-native";
 import { AppTextInput } from "@/shared/components/app-text-input";
@@ -39,18 +39,15 @@ export function PasswordInput({
 		name: "password",
 	});
 
-	const handleToggle = useCallback(() => {
+	const handleToggle = () => {
 		setIsPasswordVisible((prev) => !prev);
-	}, []);
+	};
 
-	const rightAdornment = useMemo(
-		() => (
-			<PasswordToggle
-				onPress={handleToggle}
-				label={isPasswordVisible ? "Hide" : "Show"}
-			/>
-		),
-		[handleToggle, isPasswordVisible],
+	const rightAdornment = (
+		<PasswordToggle
+			onPress={handleToggle}
+			label={isPasswordVisible ? "Hide" : "Show"}
+		/>
 	);
 
 	return (

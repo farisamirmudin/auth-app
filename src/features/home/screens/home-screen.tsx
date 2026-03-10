@@ -1,5 +1,4 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useCallback } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/features/auth/hooks/use-auth";
@@ -11,10 +10,6 @@ export function HomeScreen() {
 
 	const userName = user?.name ?? "-";
 	const userEmail = user?.email ?? "-";
-
-	const handleLogout = useCallback(async () => {
-		await logout();
-	}, [logout]);
 
 	return (
 		<SafeAreaView style={styles.safeArea}>
@@ -31,11 +26,7 @@ export function HomeScreen() {
 					</View>
 				</View>
 
-				<AppButton
-					onPress={handleLogout}
-					isLoading={isLoading}
-					label="Logout"
-				/>
+				<AppButton onPress={logout} isLoading={isLoading} label="Logout" />
 			</View>
 		</SafeAreaView>
 	);
@@ -69,22 +60,5 @@ const styles = StyleSheet.create({
 	userEmail: {
 		color: colors.textSecondary,
 		fontSize: 15,
-	},
-	logoutButton: {
-		alignItems: "center",
-		backgroundColor: colors.primary,
-		borderRadius: 12,
-		justifyContent: "center",
-		marginBottom: 8,
-		minHeight: 52,
-		paddingHorizontal: 20,
-	},
-	logoutButtonText: {
-		color: colors.surface,
-		fontSize: 16,
-		fontWeight: "600",
-	},
-	buttonDisabled: {
-		opacity: 0.6,
 	},
 });
