@@ -7,72 +7,6 @@ A React Native authentication app built with Expo, featuring Login and Signup fl
 This branch enables the **React 19 Compiler**. React Compiler auto-memoizes, so I don't explicitly add `useMemo`, `memo`, or `useCallback`.
 Use the `main` branch for the non-compiler version: `git switch main`.
 
-## Features
-
-### Authentication Context
-
-- [x] `AuthContext` using React's Context API to manage global authentication state
-- [x] `login` function to log in a user
-- [x] `signup` function to create a new user
-- [x] `logout` function to log out the user
-- [x] `user` state to store the currently logged-in user's information
-
-### Screens
-
-#### Login Screen
-
-- [x] Email input field
-- [x] Password input field
-- [x] "Login" button that triggers the login function from the AuthContext
-- [x] Error message for invalid email/password format
-- [x] Error message for incorrect credentials
-- [x] "Go to Signup" button to navigate to the Signup screen
-
-#### Signup Screen
-
-- [x] Name input field
-- [x] Email input field
-- [x] Password input field
-- [x] "Signup" button that triggers the signup function from the AuthContext
-- [x] Error message for missing fields
-- [x] Error message for invalid email format
-- [x] Error message for password length less than 6 characters
-- [x] "Go to Login" button to navigate back to the Login screen
-
-#### Home Screen
-
-- [x] Display the currently logged-in user's name and email
-- [x] "Logout" button to log out the user and return to the Login screen
-
-### Persist Authentication
-
-- [x] Uses AsyncStorage to persist authentication state across app restarts
-
-### Navigation
-
-- [x] React Navigation managing Login, Signup, and Home screens
-- [x] Auth stack (Login/Signup) and App stack (Home) separated based on auth state
-
-### UI Design
-
-- [x] Clean with intuitive navigation
-- [x] Styled input fields, buttons, and error messages
-
-### Bonus
-
-- [x] Password visibility toggle with eye icon
-
-## Tech Stack
-
-- **Framework:** React Native with Expo (SDK 54)
-- **React Compiler:** Enabled (React 19 Compiler)
-- **Navigation:** React Navigation (Native Stack)
-- **State Management:** React Context API + TanStack React Query
-- **Form Handling:** React Hook Form + Zod validation
-- **Storage:** AsyncStorage
-- **Crypto:** expo-crypto (SHA-256 password hashing)
-- **Linting:** Biome
-
 ## Getting Started
 
 ### Prerequisites
@@ -97,9 +31,63 @@ yarn ios
 yarn android
 ```
 
+## Features
+
+### Authentication Context and Route Gating
+
+- Uses `AuthContext` as the source of truth for `user`, `isAuthenticated`, `isInitializing`, `isLoading`, and auth actions (`login`, `signup`, `logout`, `clearAuthError`).
+- Uses route gating in `RootNavigator` to show `AuthStack` (Login/Signup) when logged out and `AppStack` (Home) when logged in.
+
+### Login Flow
+
+- Login screen uses React Hook Form + Zod (`loginSchema`) to validate email format and required password.
+- On submit, the app reads `auth:user:<email>` from AsyncStorage, verifies the password hash, and stores `auth:session-email` on success.
+- Shows inline field validation errors and auth-level incorrect-credentials errors.
+
+### Signup Flow
+
+- Signup screen uses React Hook Form + Zod (`signupSchema`) for required name, valid email, and minimum password length.
+- Prevents duplicate emails by checking existing `auth:user:<email>` records before saving.
+- On success, creates the user, hashes password via `expo-crypto`, saves the user record, and starts a session.
+
+### Storage and Session Persistence
+
+- Persists each account as `auth:user:<email>` with `{ name, email, password }`.
+- Persists active session as `auth:session-email`.
+- On app launch, restores session by loading `auth:session-email` and hydrating the matching user.
+- On logout, clears only `auth:session-email` and returns to auth screens.
+
+### Crypto and Password Handling
+
+- Passwords are not stored in plain text.
+- `src/lib/crypto.ts` generates a random salt and hashes `salt + password` with SHA-256 using `expo-crypto`.
+- Stored format is `salt$hash`, and login re-hashes input password with the same salt for comparison.
+
+### UI and Bonus
+
+- Includes Login, Signup, and Home screens with reusable input/button components and consistent styling.
+- Includes password visibility toggle on auth forms.
+
+## Tech Stack
+
+- **Framework:** React Native with Expo (SDK 54)
+- **React Compiler:** Enabled (React 19 Compiler)
+- **Navigation:** React Navigation (Native Stack)
+- **State Management:** React Context API + TanStack React Query
+- **Form Handling:** React Hook Form + Zod validation
+- **Storage:** AsyncStorage
+- **Crypto:** expo-crypto (SHA-256 password hashing)
+- **Linting:** Biome
+
 ## Demo Flow (Maestro)
 
 A [Maestro](https://maestro.mobile.dev/) E2E flow is included to automate the full app walkthrough. Screenshots can be found in `screenshots/`.
+
+Play at x2 speed.
+
+https://github.com/user-attachments/assets/95858fb4-f556-4532-80c2-1ff7a715fa1d
+
+
 
 It covers:
 
@@ -115,13 +103,6 @@ It covers:
 10. Logout and attempt signup with already registered email
 11. Successful login with the created account
 12. Session persistence (quit and reopen app)
-
-### iOS
-https://github.com/user-attachments/assets/15d1627c-eea6-4ed8-b82f-cf504ba6fcb3
-
-
-### Android
-https://github.com/user-attachments/assets/dcba5942-787e-4550-a74e-3b17af20ef91
 
 
 ### Running the flow

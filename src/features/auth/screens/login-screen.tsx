@@ -34,9 +34,10 @@ export function LoginScreen({ navigation }: LoginScreenProps) {
 		navigation.replace("signup");
 	};
 
-	const loginButtonLabel = isLoading ? "Logging in..." : "Login";
 	const onSubmit = async (values: LoginFormValues) => {
 		clearAuthError();
+		// should have called a useMutation hook here, but requirement says
+		// to "triggers the login function from the AuthContext."
 		await login(values);
 	};
 
@@ -57,7 +58,7 @@ export function LoginScreen({ navigation }: LoginScreenProps) {
 					testID="login-button"
 					onPress={handleSubmit(onSubmit)}
 					isLoading={isLoading}
-					label={loginButtonLabel}
+					label="Login"
 					variant="primary"
 				/>
 				<AppButton

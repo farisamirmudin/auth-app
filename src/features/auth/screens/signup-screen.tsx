@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { FormProvider, useController, useForm } from "react-hook-form";
+import { Controller, FormProvider, useForm } from "react-hook-form";
 import { StyleSheet, Text } from "react-native";
 import { EmailInput } from "@/features/auth/components/email-input";
 import { Layout } from "@/features/auth/components/layout";
@@ -31,36 +31,35 @@ export function SignupScreen({ navigation }: SignupScreenProps) {
 
 	const { handleSubmit } = methods;
 
-	const {
-		field: nameField,
-		fieldState: { error },
-	} = useController({
-		control: methods.control,
-		name: "name",
-	});
-
 	const handleNavigateToLogin = () => {
 		clearAuthError();
 		navigation.replace("login");
 	};
 
-	const signupButtonLabel = isLoading ? "Signing up..." : "Signup";
 	const onSubmit = async (values: SignupFormValues) => {
 		clearAuthError();
+		// should have called a useMutation hook here, but requirement says
+		// to "triggers the signup function from the AuthContext."
 		await signup(values);
 	};
 
 	return (
 		<Layout title="Signup" description="Create your account to get started.">
 			<FormProvider {...methods}>
-				<AppTextInput
-					testID="name-input"
-					label="Name"
-					textContentType="name"
-					value={nameField.value ?? ""}
-					onChangeText={nameField.onChange}
-					onBlur={nameField.onBlur}
-					errorMessage={error?.message}
+				<Controller
+					control={methods.control}
+					name="name"
+					render={({ field, fieldState: { error } }) => (
+						<AppTextInput
+							testID="name-input"
+							label="Name"
+							textContentType="name"
+							value={field.value}
+							onChangeText={field.onChange}
+							onBlur={field.onBlur}
+							errorMessage={error?.message}
+						/>
+					)}
 				/>
 				<EmailInput />
 				<PasswordInput textContentType="newPassword" />
@@ -73,7 +72,7 @@ export function SignupScreen({ navigation }: SignupScreenProps) {
 					testID="signup-button"
 					onPress={handleSubmit(onSubmit)}
 					isLoading={isLoading}
-					label={signupButtonLabel}
+					label="Signup"
 					variant="primary"
 				/>
 				<AppButton

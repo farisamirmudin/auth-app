@@ -5,7 +5,7 @@ export function EmailInput() {
 	const {
 		field: emailField,
 		fieldState: { error },
-	} = useController({
+	} = useController<{ email: string }>({
 		name: "email",
 	});
 

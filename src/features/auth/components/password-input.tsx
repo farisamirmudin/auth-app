@@ -1,26 +1,30 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { useController } from "react-hook-form";
-import { Pressable, StyleSheet, Text } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
 import { AppTextInput } from "@/shared/components/app-text-input";
 import { colors } from "@/shared/theme/colors";
 
 function PasswordToggle({
 	onPress,
-	label,
+	isVisible,
 }: {
 	onPress: () => void;
-	label: string;
+	isVisible: boolean;
 }) {
 	return (
 		<Pressable
 			testID="password-toggle"
 			accessibilityRole="button"
-			accessibilityLabel={`${label} password`}
-			accessibilityHint="Toggle password visibility"
+			accessibilityLabel={isVisible ? "Hide password" : "Show password"}
 			style={styles.passwordToggleButton}
 			onPress={onPress}
 		>
-			<Text style={styles.passwordToggleText}>{label}</Text>
+			<Ionicons
+				name={isVisible ? "eye-off-outline" : "eye-outline"}
+				size={20}
+				color={colors.textMuted}
+			/>
 		</Pressable>
 	);
 }
@@ -44,10 +48,7 @@ export function PasswordInput({
 	};
 
 	const rightAdornment = (
-		<PasswordToggle
-			onPress={handleToggle}
-			label={isPasswordVisible ? "Hide" : "Show"}
-		/>
+		<PasswordToggle onPress={handleToggle} isVisible={isPasswordVisible} />
 	);
 
 	return (
@@ -72,10 +73,5 @@ const styles = StyleSheet.create({
 		minHeight: 36,
 		minWidth: 48,
 		paddingHorizontal: 4,
-	},
-	passwordToggleText: {
-		color: colors.primary,
-		fontSize: 13,
-		fontWeight: "600",
 	},
 });
