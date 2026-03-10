@@ -10,22 +10,6 @@ export type Err<E> = {
 
 export type Result<T, E> = Ok<T> | Err<E>;
 
-export const result = {
-	ok<T>(value: T): Ok<T> {
-		return {
-			ok: true,
-			value,
-		};
-	},
-
-	err<E>(error: E): Err<E> {
-		return {
-			ok: false,
-			error,
-		};
-	},
-};
-
 export async function tryCatch<T, E>(
 	fn: () => Promise<T>,
 	mapError: (error: unknown) => E,
